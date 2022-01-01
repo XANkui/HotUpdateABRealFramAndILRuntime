@@ -18,7 +18,11 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     {
         get
         {
+#if UNITY_ANDROID
+            return Application.persistentDataPath + "/Origin/";
+#else
             return Application.streamingAssetsPath + "/";
+#endif
         }
     }
     /// <summary>
@@ -34,7 +38,10 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
 
         m_ResouceItemDic.Clear();
         string configPath = ABLoadPath + m_ABConfigABName;
-        AssetBundle configAB = AssetBundle.LoadFromFile(configPath);
+        string hotConfigPath = HotPatchManager.Instance.ComputeABPath(m_ABConfigABName);
+        configPath = string.IsNullOrEmpty(hotConfigPath) ? configPath : hotConfigPath;
+        byte[] bytes = AES.AESFileByteDecrypt(configPath, "Xan");
+        AssetBundle configAB = AssetBundle.LoadFromMemory(bytes);
         TextAsset textAsset = configAB.LoadAsset<TextAsset>(m_ABConfigABName);
         if (textAsset == null)
         {
@@ -113,8 +120,10 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
         if (!m_AssetBundleItemDic.TryGetValue(crc, out item))
         {
             AssetBundle assetBundle = null;
-            string fullPath = ABLoadPath + name;
-            assetBundle = AssetBundle.LoadFromFile(fullPath);
+            string hotABPath = HotPatchManager.Instance.ComputeABPath(name);
+            string fullPath = string.IsNullOrEmpty(hotABPath) ? (ABLoadPath + name): hotABPath;
+            byte[] bytes = AES.AESFileByteDecrypt(fullPath,"Xan");
+            assetBundle = AssetBundle.LoadFromMemory(bytes);
 
             if (assetBundle == null)
             {

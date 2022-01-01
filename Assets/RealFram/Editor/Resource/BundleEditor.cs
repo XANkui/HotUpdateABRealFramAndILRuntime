@@ -9,9 +9,9 @@ using UnityEngine.Profiling;
 
 public class BundleEditor
 {
-    private static string m_BunleTargetPath = Application.dataPath+"/../AssetBundle/" + EditorUserBuildSettings.activeBuildTarget.ToString();
-    private static string m_VersionMd5Path = Application.dataPath+"/../Version/"+ EditorUserBuildSettings.activeBuildTarget.ToString();
-    private static string m_HotPath = Application.dataPath+"/../Hot/"+ EditorUserBuildSettings.activeBuildTarget.ToString();
+    private static string m_BunleTargetPath = Application.dataPath + "/../AssetBundle/" + EditorUserBuildSettings.activeBuildTarget.ToString();
+    private static string m_VersionMd5Path = Application.dataPath + "/../Version/" + EditorUserBuildSettings.activeBuildTarget.ToString();
+    private static string m_HotPath = Application.dataPath + "/../Hot/" + EditorUserBuildSettings.activeBuildTarget.ToString();
     private static string ABCONFIGPATH = "Assets/RealFram/Editor/Resource/ABConfig.asset";
     private static string ABBYTEPATH = RealConfig.GetRealFram().m_ABBytePath;
     //key是ab包名，value是路径，所有文件夹ab包dic
@@ -29,7 +29,7 @@ public class BundleEditor
     public static void NormalBuild() {
         Build();
     }
-    public static void Build(bool hotfix=false,string abmd5Path="",string hotCount="1")
+    public static void Build(bool hotfix = false, string abmd5Path = "", string hotCount = "1")
     {
         DataEditor.AllXmlToBinary();
         m_ConfigFil.Clear();
@@ -102,7 +102,7 @@ public class BundleEditor
 
         if (hotfix == true)
         {
-            ReadMd5Com(abmd5Path,hotCount);
+            ReadMd5Com(abmd5Path, hotCount);
         }
         else {
             WriteABMD5();
@@ -113,29 +113,75 @@ public class BundleEditor
         EditorUtility.ClearProgressBar();
     }
 
+    [MenuItem("Tools/测试/测试重复加密")]
+    public static void TestEnc() {
+        AES.AESFileEncrypt(Application.dataPath + "/GameData/Data/Xml/TestData.xml", "Xan");
+    }
+
+    [MenuItem("Tools/测试/测试解密")]
+    public static void TestDec()
+    {
+        AES.AESFileDecrypt(Application.dataPath + "/GameData/Data/Xml/TestData.xml", "Xan");
+
+    }
+
+    [MenuItem("Tools/测试/AB/加密AB包")]
+    public static void EncryptAB()
+    {
+        DirectoryInfo directory = new DirectoryInfo(m_BunleTargetPath);
+        FileInfo[] files = directory.GetFiles("*", SearchOption.AllDirectories);
+        for (int i = 0; i < files.Length; i++)
+        {
+            if (files[i].Name.EndsWith(".meta") == false
+                && files[i].Name.EndsWith(".manifest") == false)
+            {
+                AES.AESFileEncrypt(files[i].FullName, "Xan");
+            }
+        }
+
+        Debug.Log("AB包加密完成");
+    }
+
+    [MenuItem("Tools/测试/AB/解密AB包")]
+    public static void DecryptAB()
+    {
+        DirectoryInfo directory = new DirectoryInfo(m_BunleTargetPath);
+        FileInfo[] files = directory.GetFiles("*", SearchOption.AllDirectories);
+        for (int i = 0; i < files.Length; i++)
+        {
+            if (files[i].Name.EndsWith(".meta") == false
+                && files[i].Name.EndsWith(".manifest") == false)
+            {
+                AES.AESFileDecrypt(files[i].FullName, "Xan");
+            }
+        }
+
+        Debug.Log("AB包解密完成");
+    }
+
     static void WriteABMD5() {
         DirectoryInfo directoryInfo = new DirectoryInfo(m_BunleTargetPath);
-        FileInfo[] files = directoryInfo.GetFiles("*",SearchOption.AllDirectories);
+        FileInfo[] files = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
         ABMD5 abmd5 = new ABMD5();
         abmd5.ABMD5List = new List<ABMD5Base>();
         for (int i = 0; i < files.Length; i++)
         {
-            if (files[i].Name.EndsWith(".meta")==false && files[i].Name.EndsWith(".manifest")==false)
+            if (files[i].Name.EndsWith(".meta") == false && files[i].Name.EndsWith(".manifest") == false)
             {
                 ABMD5Base abmd5Base = new ABMD5Base();
                 abmd5Base.Name = files[i].Name;
                 abmd5Base.Md5 = MD5Manager.Instance.BuildFileMd5(files[i].FullName); //MD5Manager
                 abmd5Base.Size = files[i].Length / 1024.0f;
                 abmd5.ABMD5List.Add(abmd5Base);
-                    
+
             }
         }
 
         string ABMD5Path = Application.dataPath + "/Resources/ABMD5.bytes";
-        BinarySerializeOpt.BinarySerilize(ABMD5Path,abmd5);
+        BinarySerializeOpt.BinarySerilize(ABMD5Path, abmd5);
 
         // 将当前版本拷贝到外部进行储存
-        if (Directory.Exists(m_VersionMd5Path)==false)
+        if (Directory.Exists(m_VersionMd5Path) == false)
         {
             Directory.CreateDirectory(m_VersionMd5Path);
         }
@@ -144,27 +190,27 @@ public class BundleEditor
         {
             File.Delete(targetPath);
         }
-        File.Copy(ABMD5Path,targetPath);
+        File.Copy(ABMD5Path, targetPath);
     }
 
-    static void ReadMd5Com(string abmd5Path,string hotCount) {
+    static void ReadMd5Com(string abmd5Path, string hotCount) {
         m_PackedMd5.Clear();
-        using (FileStream fileStream = new FileStream(abmd5Path,FileMode.Open,FileAccess.Read))
+        using (FileStream fileStream = new FileStream(abmd5Path, FileMode.Open, FileAccess.Read))
         {
             BinaryFormatter bf = new BinaryFormatter();
             ABMD5 abmd5 = bf.Deserialize(fileStream) as ABMD5;
             foreach (ABMD5Base aBMD5Base in abmd5.ABMD5List)
             {
-                m_PackedMd5.Add(aBMD5Base.Name,aBMD5Base);
+                m_PackedMd5.Add(aBMD5Base.Name, aBMD5Base);
             }
         }
 
         List<string> changeList = new List<string>();
         DirectoryInfo directoryInfo = new DirectoryInfo(m_BunleTargetPath);
-        FileInfo[] files = directoryInfo.GetFiles("*",SearchOption.AllDirectories);
+        FileInfo[] files = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
         for (int i = 0; i < files.Length; i++)
         {
-            if (files[i].Name.EndsWith(".meta")==false && files[i].Name.EndsWith(".manifest")==false)
+            if (files[i].Name.EndsWith(".meta") == false && files[i].Name.EndsWith(".manifest") == false)
             {
                 string name = files[i].Name;
                 string md5 = MD5Manager.Instance.BuildFileMd5(files[i].FullName);
@@ -174,9 +220,9 @@ public class BundleEditor
                     changeList.Add(name);
                 }
                 else {
-                    if (m_PackedMd5.TryGetValue(name,out abmd5Base))
+                    if (m_PackedMd5.TryGetValue(name, out abmd5Base))
                     {
-                        if (md5!=abmd5Base.Md5)
+                        if (md5 != abmd5Base.Md5)
                         {
                             changeList.Add(name);
                         }
@@ -185,11 +231,16 @@ public class BundleEditor
             }
         }
 
-        CopyABAndGenerateXml(changeList,hotCount);
+        CopyABAndGenerateXml(changeList, hotCount);
     }
 
-    static void CopyABAndGenerateXml(List<string> changeList,string hotCount) {
-        if (Directory.Exists(m_HotPath)==false)
+    /// <summary>
+    /// 拷贝筛选的AB包以及自定生成服务器配置表
+    /// </summary>
+    /// <param name="changeList"></param>
+    /// <param name="hotCount"></param>
+    static void CopyABAndGenerateXml(List<string> changeList, string hotCount) {
+        if (Directory.Exists(m_HotPath) == false)
         {
             Directory.CreateDirectory(m_HotPath);
         }
@@ -197,11 +248,30 @@ public class BundleEditor
         DeleteAllFile(m_HotPath);
         foreach (string str in changeList)
         {
-            if (str.EndsWith(".manifest")==false)
+            if (str.EndsWith(".manifest") == false)
             {
-                File.Copy(m_BunleTargetPath+"/"+str,m_HotPath+"/"+str);
+                File.Copy(m_BunleTargetPath + "/" + str, m_HotPath + "/" + str);
             }
         }
+
+        // 生成服务器 Patch
+        DirectoryInfo directoryInfo = new DirectoryInfo(m_HotPath);
+        FileInfo[] files = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
+        Patches patches = new Patches();
+        patches.Version = 1;
+        patches.Files = new List<Patch>();
+        for (int i = 0; i < files.Length; i++)
+        {
+            Patch patch = new Patch();
+            patch.Md5 = MD5Manager.Instance.BuildFileMd5(files[i].FullName);
+            patch.Name = files[i].Name;
+            patch.Size = files[i].Length / 1024.0f;
+            patch.Platform = EditorUserBuildSettings.activeBuildTarget.ToString();
+            patch.Url = "http://127.0.0.1/AssetBundle/" + PlayerSettings.bundleVersion + "/" + hotCount + "/" + files[i].Name;
+            patches.Files.Add(patch);
+        }
+
+        BinarySerializeOpt.Xmlserialize(m_HotPath + "/Patch.xml", patches);
     }
 
     static void SetABName(string name, string path)
@@ -238,7 +308,7 @@ public class BundleEditor
                 if (allBundlePath[j].EndsWith(".cs"))
                     continue;
 
-                Debug.Log("此AB包：" + allBundles[i] + "下面包含的资源文件路径：" + allBundlePath[j]);
+                //Debug.Log("此AB包：" + allBundles[i] + "下面包含的资源文件路径：" + allBundlePath[j]);
                 resPathDic.Add(allBundlePath[j], allBundles[i]);
             }
         }
@@ -260,6 +330,23 @@ public class BundleEditor
         else
         {
             Debug.Log("AssetBundle 打包完毕");
+        }
+        DeleteManifest();// 删除Manifest(manifest 是 Unity 便于查看依赖关系的表而已)
+        EncryptAB();// AB包加密
+    }
+
+    /// <summary>
+    /// 删除 Manifest 文件
+    /// </summary>
+    static void DeleteManifest() {
+        DirectoryInfo directory = new DirectoryInfo(m_BunleTargetPath);
+        FileInfo[] files = directory.GetFiles("*",SearchOption.AllDirectories);
+        for (int i = 0; i < files.Length; i++)
+        {
+            if (files[i].Name.EndsWith(".manifest")==true)
+            {
+                File.Delete(files[i].FullName);
+            }
         }
     }
 

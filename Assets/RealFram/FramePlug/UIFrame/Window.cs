@@ -14,6 +14,9 @@ public class Window
     //名字
     public string Name { get; set; }
 
+    //是否是 Resources 加载
+    public bool IsResourceLoad { get; set; } = false;
+
     //所有的Button
     protected List<Button> m_AllButton = new List<Button>();
 

@@ -13,7 +13,7 @@ public class UIManager : Singleton<UIManager>
     //UI节点
     public RectTransform m_UiRoot;
     //窗口节点
-    private RectTransform m_WndRoot;
+    public RectTransform m_WndRoot;
     //UI摄像机
     private Camera m_UICamera;
     //EventSystem节点
@@ -144,7 +144,7 @@ public class UIManager : Singleton<UIManager>
     /// <param name="para2"></param>
     /// <param name="para3"></param>
     /// <returns></returns>
-    public Window PopUpWnd(string wndName, bool bTop = true, params object[] paralist)
+    public Window PopUpWnd(string wndName, bool bTop = true, bool isResourceLoad = false,params object[] paralist)
     {
         Window wnd = FindWndByName<Window>(wndName);
         if (wnd == null)
@@ -159,8 +159,16 @@ public class UIManager : Singleton<UIManager>
                 Debug.LogError("找不到窗口对应的脚本，窗口名是：" + wndName);
                 return null;
             }
+            GameObject wndObj = null;
+            if (isResourceLoad == true)
+            {
+                wndObj = GameObject.Instantiate(Resources.Load<GameObject>(wndName.Replace(".prefab","")));
+                wndObj.transform.SetParent(m_WndRoot,false);
+            }
+            else { 
+                wndObj = ObjectManager.Instance.InstantiateObject(m_UIPrefabPath + wndName, false, false);
 
-            GameObject wndObj = ObjectManager.Instance.InstantiateObject(m_UIPrefabPath + wndName, false, false);
+            }
             if (wndObj == null)
             {
                 Debug.Log("创建窗口Prefab失败：" + wndName);
@@ -177,6 +185,7 @@ public class UIManager : Singleton<UIManager>
             wnd.Transform = wndObj.transform;
             wnd.Name = wndName;
             wnd.Awake(paralist);
+            wnd.IsResourceLoad = isResourceLoad;
             wndObj.transform.SetParent(m_WndRoot, false);
 
             if (bTop)
@@ -222,14 +231,21 @@ public class UIManager : Singleton<UIManager>
                 m_WindowList.Remove(window);
             }
 
-            if (destory)
+            if (window.IsResourceLoad == false)
             {
-                ObjectManager.Instance.ReleaseObject(window.GameObject, 0, true);
+                if (destory)
+                {
+                    ObjectManager.Instance.ReleaseObject(window.GameObject, 0, true);
+                }
+                else
+                {
+                    ObjectManager.Instance.ReleaseObject(window.GameObject, recycleParent: false);
+                }
             }
-            else
-            {
-                ObjectManager.Instance.ReleaseObject(window.GameObject, recycleParent: false);
+            else {
+                GameObject.Destroy(window.GameObject);
             }
+            
             window.GameObject = null;
             window = null;
         }
@@ -249,10 +265,10 @@ public class UIManager : Singleton<UIManager>
     /// <summary>
     /// 切换到唯一窗口
     /// </summary>
-    public void SwitchStateByName(string name,bool bTop = true,params object[] paralist)
+    public void SwitchStateByName(string name,bool bTop = true,bool isResourcesLoad=false, params object[] paralist)
     {
         CloseAllWnd();
-        PopUpWnd(name, bTop, paralist);
+        PopUpWnd(name, bTop, isResourcesLoad, paralist);
     }
 
     /// <summary>
