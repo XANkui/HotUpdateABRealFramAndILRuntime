@@ -1,0 +1,6 @@
+D:\MySoftware\Projects\UnityProjects\HotUpdateRealFramAndILRuntime\Assets\GameData\Data\HotFix\HotFix.dll
+D:\MySoftware\Projects\UnityProjects\HotUpdateRealFramAndILRuntime\Assets\GameData\Data\HotFix\HotFix.pdb
+D:\MySoftware\Projects\UnityProjects\HotUpdateRealFramAndILRuntime\ILRuntimeHotFixProject\HotFix\HotFix\obj\Debug\HotFix.csprojAssemblyReference.cache
+D:\MySoftware\Projects\UnityProjects\HotUpdateRealFramAndILRuntime\ILRuntimeHotFixProject\HotFix\HotFix\obj\Debug\HotFix.csproj.CoreCompileInputs.cache
+D:\MySoftware\Projects\UnityProjects\HotUpdateRealFramAndILRuntime\ILRuntimeHotFixProject\HotFix\HotFix\obj\Debug\HotFix.dll
+D:\MySoftware\Projects\UnityProjects\HotUpdateRealFramAndILRuntime\ILRuntimeHotFixProject\HotFix\HotFix\obj\Debug\HotFix.pdb

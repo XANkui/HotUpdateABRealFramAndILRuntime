@@ -31,6 +31,11 @@ public class GameStart : MonoSingleton<GameStart>
         text.text = "加载本地数据......";
         AssetBundleManager.Instance.LoadAssetBundleConfig();
 
+        image.fillAmount = 0.2f;
+        yield return null;
+        text.text = "加载热更 DLL ......";
+        ILRuntimeManager.Instance.Init();
+
         image.fillAmount = 0.3f;
         yield return null;
         text.text = "加载数据表......";
@@ -77,6 +82,10 @@ public class GameStart : MonoSingleton<GameStart>
         commonItem.Show(title,content,confirmAction,cancelAction);
     }
 
+    private void OnDestroy()
+    {
+        ILRuntimeManager.Instance.OnDestroy();
+    }
     private void OnApplicationQuit()
     {
 #if UNITY_EDITOR
