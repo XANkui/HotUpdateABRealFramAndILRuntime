@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Events;
 
 #region 测试跨域自定义类
 
@@ -372,6 +373,7 @@ public class ILRuntimeManager : Singleton<ILRuntimeManager>
     private const string PDB_PATH = "Assets/GameData/Data/HotFix/HotFix.pdb.bytes";
 
     AppDomain m_AppDomain;
+    public AppDomain ILRuntimeAppDomain { get => m_AppDomain; }
 	MemoryStream m_Dll;
 	MemoryStream m_Pdb;
 	public void Init() {
@@ -419,6 +421,7 @@ public class ILRuntimeManager : Singleton<ILRuntimeManager>
 		InheritanceClassAdapterRegister();
 		CoroutineClassAdapterRegister();
 		MonobehaviourClassAdapterRegister();
+		WindowUIClassAdapterRegister();
 		SetupCLRAddComponentRedirectionRegister();
 		SetupCLRGetComponentRedirectionRegister();
 		CLRBindingRegister();
@@ -438,9 +441,22 @@ public class ILRuntimeManager : Singleton<ILRuntimeManager>
 			});
 		});
 
+		m_AppDomain.DelegateManager.RegisterDelegateConvertor<UnityAction>((action) => {
+			return new UnityAction(() => {
+				((System.Action)(action))();
+			});
+		});
+
+		m_AppDomain.DelegateManager.RegisterDelegateConvertor<OnAsyncObjFinish>((action) =>{
+			return new OnAsyncObjFinish(( path,  obj,  param1 ,  param2 ,  param3 )=> {
+				((System.Action<string, Object, object, object, object>)(action))(path, obj, param1, param2, param3);
+			});
+		});
+
 		// （默认委托）跨域委托调用的时候注意，这里要注册(委托参数类型 method 类似 Action 委托；Function 类似 Function)
 		m_AppDomain.DelegateManager.RegisterMethodDelegate<string>();
 		m_AppDomain.DelegateManager.RegisterMethodDelegate<int>();
+		m_AppDomain.DelegateManager.RegisterMethodDelegate< string , Object , object , object , object> ();
 		m_AppDomain.DelegateManager.RegisterFunctionDelegate<int, string>();
 	}
 
@@ -459,6 +475,12 @@ public class ILRuntimeManager : Singleton<ILRuntimeManager>
 	private void MonobehaviourClassAdapterRegister()
 	{
 		m_AppDomain.RegisterCrossBindingAdaptor(new MonoBehaviourAdaptor());
+	}
+
+	// UI Window适配器注册
+	private void WindowUIClassAdapterRegister()
+	{
+		m_AppDomain.RegisterCrossBindingAdaptor(new WindowAdaptor());
 	}
 
 	// 绑定注册

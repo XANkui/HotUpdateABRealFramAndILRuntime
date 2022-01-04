@@ -35,6 +35,34 @@ namespace ILRuntime.Runtime.Generated
                     lst.Add(m);
                 }
             }
+            args = new Type[]{typeof(global::LoadingPanel)};
+            if (genericMethods.TryGetValue("GetComponent", out lst))
+            {
+                foreach(var m in lst)
+                {
+                    if(m.MatchGenericParameters(args, typeof(global::LoadingPanel)))
+                    {
+                        method = m.MakeGenericMethod(args);
+                        app.RegisterCLRMethodRedirection(method, GetComponent_0);
+
+                        break;
+                    }
+                }
+            }
+            args = new Type[]{typeof(global::MenuPanel)};
+            if (genericMethods.TryGetValue("GetComponent", out lst))
+            {
+                foreach(var m in lst)
+                {
+                    if(m.MatchGenericParameters(args, typeof(global::MenuPanel)))
+                    {
+                        method = m.MakeGenericMethod(args);
+                        app.RegisterCLRMethodRedirection(method, GetComponent_1);
+
+                        break;
+                    }
+                }
+            }
             args = new Type[]{typeof(global::MonoBehaviourAdaptor.Adaptor)};
             if (genericMethods.TryGetValue("AddComponent", out lst))
             {
@@ -43,7 +71,21 @@ namespace ILRuntime.Runtime.Generated
                     if(m.MatchGenericParameters(args, typeof(global::MonoBehaviourAdaptor.Adaptor)))
                     {
                         method = m.MakeGenericMethod(args);
-                        app.RegisterCLRMethodRedirection(method, AddComponent_0);
+                        app.RegisterCLRMethodRedirection(method, AddComponent_2);
+
+                        break;
+                    }
+                }
+            }
+            args = new Type[]{typeof(global::MonoBehaviourAdaptor.Adaptor)};
+            if (genericMethods.TryGetValue("GetComponent", out lst))
+            {
+                foreach(var m in lst)
+                {
+                    if(m.MatchGenericParameters(args, typeof(global::MonoBehaviourAdaptor.Adaptor)))
+                    {
+                        method = m.MakeGenericMethod(args);
+                        app.RegisterCLRMethodRedirection(method, GetComponent_3);
 
                         break;
                     }
@@ -54,7 +96,47 @@ namespace ILRuntime.Runtime.Generated
         }
 
 
-        static StackObject* AddComponent_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* GetComponent_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* ptr_of_this_method;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 1);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
+            UnityEngine.GameObject instance_of_this_method = (UnityEngine.GameObject)typeof(UnityEngine.GameObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            __intp.Free(ptr_of_this_method);
+
+            var result_of_this_method = instance_of_this_method.GetComponent<global::LoadingPanel>();
+
+            object obj_result_of_this_method = result_of_this_method;
+            if(obj_result_of_this_method is CrossBindingAdaptorType)
+            {    
+                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
+            }
+            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
+        }
+
+        static StackObject* GetComponent_1(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* ptr_of_this_method;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 1);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
+            UnityEngine.GameObject instance_of_this_method = (UnityEngine.GameObject)typeof(UnityEngine.GameObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            __intp.Free(ptr_of_this_method);
+
+            var result_of_this_method = instance_of_this_method.GetComponent<global::MenuPanel>();
+
+            object obj_result_of_this_method = result_of_this_method;
+            if(obj_result_of_this_method is CrossBindingAdaptorType)
+            {    
+                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
+            }
+            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
+        }
+
+        static StackObject* AddComponent_2(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
@@ -65,6 +147,26 @@ namespace ILRuntime.Runtime.Generated
             __intp.Free(ptr_of_this_method);
 
             var result_of_this_method = instance_of_this_method.AddComponent<global::MonoBehaviourAdaptor.Adaptor>();
+
+            object obj_result_of_this_method = result_of_this_method;
+            if(obj_result_of_this_method is CrossBindingAdaptorType)
+            {    
+                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
+            }
+            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
+        }
+
+        static StackObject* GetComponent_3(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* ptr_of_this_method;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 1);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
+            UnityEngine.GameObject instance_of_this_method = (UnityEngine.GameObject)typeof(UnityEngine.GameObject).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            __intp.Free(ptr_of_this_method);
+
+            var result_of_this_method = instance_of_this_method.GetComponent<global::MonoBehaviourAdaptor.Adaptor>();
 
             object obj_result_of_this_method = result_of_this_method;
             if(obj_result_of_this_method is CrossBindingAdaptorType)

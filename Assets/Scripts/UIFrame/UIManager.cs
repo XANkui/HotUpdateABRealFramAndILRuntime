@@ -84,9 +84,17 @@ public class UIManager : Singleton<UIManager>
     {
         for (int i = 0; i < m_WindowList.Count; i++)
         {
-            if (m_WindowList[i] != null)
+            Window wnd = m_WindowList[i];
+            if (wnd != null)
             {
-                m_WindowList[i].OnUpdate();
+                if (wnd.IsHotFix == true)
+                {
+                    ILRuntimeManager.Instance.ILRuntimeAppDomain.Invoke(wnd.HotFixClassName, "OnUpdate", wnd, null);
+                }
+                else
+                {
+                    wnd.OnUpdate();
+                }
             }
         }
     }
@@ -144,7 +152,7 @@ public class UIManager : Singleton<UIManager>
     /// <param name="para2"></param>
     /// <param name="para3"></param>
     /// <returns></returns>
-    public Window PopUpWnd(string wndName, bool bTop = true, bool isResourceLoad = false,params object[] paralist)
+    public Window PopUpWnd(string wndName, bool bTop = true, bool isResourceLoad = false, object param1 = null, object param2 = null, object param3 = null)
     {
         Window wnd = FindWndByName<Window>(wndName);
         if (wnd == null)
@@ -152,7 +160,17 @@ public class UIManager : Singleton<UIManager>
             System.Type tp = null;
             if (m_RegisterDic.TryGetValue(wndName, out tp))
             {
-                wnd = System.Activator.CreateInstance(tp) as Window;
+                if (isResourceLoad == true)
+                {
+                    wnd = System.Activator.CreateInstance(tp) as Window;
+
+                }
+                else {
+                    string hotName = "HotFix." + wndName.Replace("Panel.prefab","Ui");
+                    wnd = ILRuntimeManager.Instance.ILRuntimeAppDomain.Instantiate<Window>(hotName);
+                    wnd.IsHotFix = true;
+                    wnd.HotFixClassName = hotName;
+                }
             }
             else
             {
@@ -184,7 +202,13 @@ public class UIManager : Singleton<UIManager>
             wnd.GameObject = wndObj;
             wnd.Transform = wndObj.transform;
             wnd.Name = wndName;
-            wnd.Awake(paralist);
+            if (wnd.IsHotFix == true)
+            {
+                ILRuntimeManager.Instance.ILRuntimeAppDomain.Invoke(wnd.HotFixClassName,"Awake",wnd,  param1, param2, param3 );
+            }
+            else { 
+                wnd.Awake(param1, param2, param3);
+            }
             wnd.IsResourceLoad = isResourceLoad;
             wndObj.transform.SetParent(m_WndRoot, false);
 
@@ -193,11 +217,18 @@ public class UIManager : Singleton<UIManager>
                 wndObj.transform.SetAsLastSibling();
             }
 
-            wnd.OnShow(paralist);
+            if (wnd.IsHotFix == true)
+            {
+                ILRuntimeManager.Instance.ILRuntimeAppDomain.Invoke(wnd.HotFixClassName, "OnShow", wnd, param1, param2, param3);
+            }
+            else
+            {
+                wnd.OnShow(param1, param2, param3);
+            }
         }
         else
         {
-            ShowWnd(wndName, bTop, paralist);
+            ShowWnd(wndName, bTop, param1, param2, param3);
         }
 
         return wnd;
@@ -223,8 +254,22 @@ public class UIManager : Singleton<UIManager>
     {
         if (window != null)
         {
-            window.OnDisable();
-            window.OnClose();
+            if (window.IsHotFix == true)
+            {
+                ILRuntimeManager.Instance.ILRuntimeAppDomain.Invoke(window.HotFixClassName, "OnDisable", window, null);
+            }
+            else
+            {
+                window.OnDisable();
+            }
+            if (window.IsHotFix == true)
+            {
+                ILRuntimeManager.Instance.ILRuntimeAppDomain.Invoke(window.HotFixClassName, "OnClose", window, null);
+            }
+            else
+            {
+                window.OnClose();
+            }
             if (m_WindowDic.ContainsKey(window.Name))
             {
                 m_WindowDic.Remove(window.Name);
@@ -291,7 +336,15 @@ public class UIManager : Singleton<UIManager>
         if (wnd != null)
         {
             wnd.GameObject.SetActive(false);
-            wnd.OnDisable();
+
+            if (wnd.IsHotFix == true)
+            {
+                ILRuntimeManager.Instance.ILRuntimeAppDomain.Invoke(wnd.HotFixClassName, "OnDisable", wnd, null);
+            }
+            else
+            {
+                wnd.OnDisable();
+            }
         }
     }
 
@@ -300,10 +353,10 @@ public class UIManager : Singleton<UIManager>
     /// </summary>
     /// <param name="name"></param>
     /// <param name="paralist"></param>
-    public void ShowWnd(string name, bool bTop = true, params object[] paralist)
+    public void ShowWnd(string name, bool bTop = true, object param1 = null, object param2 = null, object param3 = null)
     {
         Window wnd = FindWndByName<Window>(name);
-        ShowWnd(wnd, bTop, paralist);
+        ShowWnd(wnd, bTop,  param1 ,  param2 ,  param3 );
     }
 
     /// <summary>
@@ -311,13 +364,20 @@ public class UIManager : Singleton<UIManager>
     /// </summary>
     /// <param name="wnd"></param>
     /// <param name="paralist"></param>
-    public void ShowWnd(Window wnd, bool bTop = true, params object[] paralist)
+    public void ShowWnd(Window wnd, bool bTop = true, object param1 = null, object param2 = null, object param3 = null)
     {
         if (wnd != null)
         {
             if (wnd.GameObject != null && !wnd.GameObject.activeSelf) wnd.GameObject.SetActive(true);
             if (bTop) wnd.Transform.SetAsLastSibling();
-            wnd.OnShow(paralist);
+            if (wnd.IsHotFix == true)
+            {
+                ILRuntimeManager.Instance.ILRuntimeAppDomain.Invoke(wnd.HotFixClassName, "OnShow", wnd, param1, param2, param3);
+            }
+            else
+            {
+                wnd.OnShow( param1 ,  param2 ,  param3 );
+            }
         }
     }
 }
